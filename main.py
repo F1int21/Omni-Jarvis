@@ -1,12 +1,19 @@
-client_name = "Omega"
-ports_to_check = [21, 22, 23, 24, 25]
+# 1. ОПРЕДЕЛЯЕМ ФУНКЦИЮ (Создаем инструмент)
+def run_guardrails(client, ports):
+    print(f"СИСТЕМА: Запуск риск-фильтра для клиента {client}...]]")
+    for port in ports:
+        if port == 23:
+            print(f"БЛОКИРОВКА! Порт {port} - критический магистральный аплинк!")
+        else:
+            print(f"Порт {port} проверен. Узел безопасен.")
 
-print("ДЖАРВИС: Начинаю массовое сканирование портов...")
+# 2. ИСПОЛЬЗУЕМ ИНСТРУМЕНТ (Вызываем функцию для разных офисов)
+office_a_ports = [21, 22, 23]
+office_b_ports = [80, 443, 8080]
 
-for port in ports_to_check:
-    if port == 23:
-        print(f" КРИТИЧЕСКИЙ РИСК! Порт {port} является магистральным аплинком! Операция заблокирована!")
-    else:
-        print(f"Порт {port} безопасен. Привязываю к клиенту {client_name}.")
+# Вызов первый
+run_guardrails("Omega_Office_A", office_a_ports)
 
-print("ДЖАРВИС: Проверка безопасности завершена!")
+print("-" * 40) # Просто линия разделителя в консоли
+# Вызов второй
+run_guardrails("Alpha_Office_B", office_b_ports)
