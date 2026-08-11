@@ -1,19 +1,13 @@
-# 1. ОПРЕДЕЛЯЕМ ФУНКЦИЮ (Создаем инструмент)
-def run_guardrails(client, ports):
-    print(f"СИСТЕМА: Запуск риск-фильтра для клиента {client}...]]")
-    for port in ports:
-        if port == 23:
-            print(f"БЛОКИРОВКА! Порт {port} - критический магистральный аплинк!")
-        else:
-            print(f"Порт {port} проверен. Узел безопасен.")
+import os
+from PIL import ImageGrab
 
-# 2. ИСПОЛЬЗУЕМ ИНСТРУМЕНТ (Вызываем функцию для разных офисов)
-office_a_ports = [21, 22, 23]
-office_b_ports = [80, 443, 8080]
+print("ДЖАРВИС: Активирую модуль скрытых глаз клиента...")
 
-# Вызов первый
-run_guardrails("Omega_Office_A", office_a_ports)
 
-print("-" * 40) # Просто линия разделителя в консоли
-# Вызов второй
-run_guardrails("Alpha_Office_B", office_b_ports)
+# 1. Делаем снимок всего экрана прямо сейчас
+screenshot = ImageGrab.grab()
+
+# 2. Сохраняем получившуюся картинку в папку нашего проекта под именем screenshot.png
+screenshot.save("screenshot.png")
+
+print("ДЖАРВИС: Скриншот экрана успешно сделан и сохранен в папку проекта!")
