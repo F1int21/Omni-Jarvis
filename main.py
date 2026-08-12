@@ -1,26 +1,26 @@
-import os
-import requests
-from PIL import ImageGrab
+import uvicorn
+from fastapi import FastAPI, UploadFile, File
 
-print("ДЖАРВИС: Делаю снимок экрана...")
-#1. Делаем скриншот и сохраняем локально
-screenshot = ImageGrab.grab()
-screenshot.save("screenshot.png")
+#1. Создаем объект нашего сервера
+app = FastAPI()
 
-#2. Указываем адрес тестового сервера
-server_url = "https://httpbin.org/post"
+print("ДЖАРВИС: Инициализация домашнего сервер...")
 
-print(f"ДЖАРВИС: Отправляем файл screenshot.png на сервер {server_url}...")
+#2. Создаем "почтовый ящик" (эндпоинт) /post, который ждет файл
+@app.post("/post")
+async def receive_screenshot(file: UploadFile = File(...)):
+    print(f" СЕРВЕР: Поймал входящий пакет! Имя файла: {file.filename}")
 
-#3. Открываем файл и упаковываем его в сетевой пакет
-with open("screenshot.png", "rb") as file:
-    network_payload = {"file": file}
+    #Читаем байты присланного файла
+    file_bytes = await file.read()
 
-    #4. Стреляем POST-запросом по сети
-    response = requests.post(server_url, files=network_payload)
+    #Сохраняем полученный скриншот на сервере под именем server_get.png
+    with open("server_get.png", "wb") as f:
+        f.write(file_bytes)
 
-#5. Проверяем ответ сервера (Код 200 означает "Успешно долетело")
-if response.status_code == 200:
-    print("ДЖАРВИС: Сетевой мост работает! Файл успешно доставлен не сервер!")
-else:
-    print(f"ОШИБКА СЕТИ: Сервер вернул код {response.status_code}")
+    print("СЕРВЕР: Скриншот успешно сохранен в локальное хранилище сервера!")
+    return {"status": "success", "message": "Файл доставлен на домашний сервер!"}
+
+#3. Запускам сервер на локальном адресе 127.0.0.1 и порт 8000
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)
