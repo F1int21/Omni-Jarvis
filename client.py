@@ -1,21 +1,28 @@
-import os
 import requests
 from PIL import ImageGrab
-
-print("КЛИЕНТ: Снятие скриншота экрана...")
-screenshot = ImageGrab.grab()
-screenshot.save("screenshot.png")
-
-#Направляем трафик на ваш локальный домашний сервер (порт 8000, эндпоинт /post)
-server_url = "http://127.0.0.1:8000/post"
-
-print(f" КЛИЕНТ: Отправка пакета на домашний сервер {server_url}...")
-
-with open("screenshot.png", "rb") as file:
-    network_payload = {"file": file}
-    response = requests.post(server_url, files=network_payload)
-
-if response.status_code == 200:
-    print("КЛИЕНТ: Данные успешно доставлены на сервер! Сетевой мост стабилен!")
-else:
-    print(f"КЛИЕНТ ОШИБКА: Сервер ответил кодом {response.status_code}")
+SERVER_URL = "http://127.0.0.1:8000/post"
+SCREENSHOT_FILE = "client_snap.png"
+SEARCH_TARGET = "File" 
+def make_screenshot(save_path: str):
+    """ Сделать полный скриншот экрана на клиенте, сохранить в файл """
+    snap = ImageGrab.grab()
+    snap.save(save_path)
+def send_screenshot(path_img: str, search_text: str):
+    """ Отправить скриншот на сервер, получить ответ с координатами """
+    with open(path_img, "rb") as f:
+        resp = requests.post(
+            SERVER_URL,
+            params={"target_text": search_text},
+            files={"file": f}
+        )
+    data = resp.json()
+    print(f"Статус сервера: {data['status']}")
+    vis = data["vision"]
+    if vis["found"]:
+        print(f"Найдено: {vis['text']} | X={vis['center_x']}, Y={vis['center_y']} | conf={vis['confidence']}")
+    else:
+        print(f" Не найдено текст: {search_text}, ошибка={vis.get('error')}")
+    return data
+if __name__ == "__main__":
+    make_screenshot(SCREENSHOT_FILE)
+    send_screenshot(SCREENSHOT_FILE, SEARCH_TARGET)
