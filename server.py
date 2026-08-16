@@ -11,7 +11,7 @@ from ai_vision import find_text_center
 app = FastAPI(title="Omni-Jarvis Vision Server")
 
 # Конфиг: список целей для поиска. Расширишь под кнопки 1С (например, "Новый", "Записать", "Terminal")
-TARGETS = ["file", "terminal", "записать", "новая", "провести"] 
+TARGETS = ["Файл", "file", "terminal", "записать", "новая", "провести", "правка", "вид"]
 
 # Папка для временных файлов (рабочая директория)
 TEMP_IMAGE = "server_get.png"

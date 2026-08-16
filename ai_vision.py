@@ -20,7 +20,7 @@ def find_text_center(image_path: str, target_strings: list) -> dict:
     reader = get_reader()
     # detail=1 для получения bounding box'ов
     results = reader.readtext(image_path, detail=1, paragraph=False)
-    
+    print(f"[DEBUG] Распознанные тексты: {[text for (_, text, _) in results]}")
     for (bbox, text, confidence) in results:
         # Приводим к нижнему регистру для сравнения (1С любит капслок)
         clean_text = text.strip().lower()
