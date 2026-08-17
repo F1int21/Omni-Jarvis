@@ -8,6 +8,8 @@ from datetime import datetime
 # Импорт твоего CV-модуля
 from ai_vision import find_text_center
 
+from core.intent import run_agent
+
 app = FastAPI(title="Omni-Jarvis Vision Server")
 
 # Конфиг: список целей для поиска. Расширишь под кнопки 1С (например, "Новый", "Записать", "Terminal")
@@ -57,6 +59,22 @@ async def handle_ocr_request(file: UploadFile = File(...)):
         }
 
 # Точка входа для прямого запуска (python server.py)
+@app.post("/command")
+async def handle_command(command: dict):
+    """
+    Эндпоинт для текстовых команд.
+    Принимает JSON: {"command": "текст команды"}
+    Возвращает результат выполнения агента (симуляция).
+    """
+    text = command.get("command", "")
+    if not text:
+        raise HTTPException(status_code=400, detail="Поле 'command' обязательно")
+    
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Команда: {text}")
+    result = run_agent(text)
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] Результат: {result}")
+    
+    return {"status": "ok", "result": result}
+
 if __name__ == "__main__":
-    # host="0.0.0.0" чтобы принимал с локальной сети, порт 8000.
     uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
