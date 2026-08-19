@@ -1,26 +1,21 @@
 # core/planner.py
-# Планировщик: превращает интент в последовательность шагов
-
 def create_plan(intent: str, params: dict) -> list:
-    """
-    Возвращает список шагов для выполнения.
-    Каждый шаг — словарь с action и параметрами.
-    """
-    if intent == "check_port":
-        return [
-            {"action": "run_command", "cmd": f"Test-NetConnection {params['ip']} -Port 443"}
-        ]
-    elif intent == "close_port":
-        return [
-            {"action": "run_command", "cmd": f"netsh advfirewall firewall add rule name='Block Port {params['port']}' dir=in action=block protocol=TCP localport={params['port']}"}
-        ]
+    if intent == "search_file":
+        return [{
+            "action": "search_files",
+            "params": {
+                "pattern": params.get("filename", "отчёт"),
+                "roots": ["C:\\Users\\Work\\Desktop", "C:\\Users\\Work\\Documents", "C:\\Users\\Work\\Desktop\\Omni-Jarvis"]
+            }
+        }]
+
+    elif intent == "check_port":
+        return [{"action": "run_command", "params": {"cmd": f"Test-NetConnection {params['ip']} -Port 443"}}]
     elif intent == "ping":
-        return [
-            {"action": "run_command", "cmd": f"ping {params['ip']} -n 4"}
-        ]
+        return [{"action": "run_command", "params": {"cmd": f"ping {params['ip']} -n 4"}}]
+    elif intent == "close_port":
+        return [{"action": "run_command", "params": {"cmd": f"netsh advfirewall firewall add rule name='Block Port {params['port']}' dir=in action=block protocol=TCP localport={params['port']}"}}]
     elif intent == "create_user":
-        return [
-            {"action": "run_command", "cmd": f"net user {params['username']} P@ssw0rd /add"}
-        ]
+        return [{"action": "run_command", "params": {"cmd": f"net user {params['username']} P@ssw0rd /add"}}]
     else:
-        return [{"action": "unknown", "cmd": f"Не знаю, как выполнить: {params.get('text', '')}"}]
+        return [{"action": "ask_user", "params": {"question": f"Задача не распознана: {params.get('text', '')}"}}]

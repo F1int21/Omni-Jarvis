@@ -1,3 +1,8 @@
-import requests
-response = requests.post('http://localhost:8000/command', json={'command': 'пропингуй 8.8.8.8'})
-print(response.json())
+# test.py
+from core.agent import ask_agent
+
+query = "найди все файлы с отчётом"
+print(f"Запрос: {query}\n")
+result = ask_agent(query)
+print("\n=== РЕЗУЛЬТАТ ===")
+print(result)

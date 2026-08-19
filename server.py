@@ -8,7 +8,7 @@ from datetime import datetime
 # Импорт твоего CV-модуля
 from ai_vision import find_text_center
 
-from core.intent import run_agent
+from core.agent import ask_agent
 
 app = FastAPI(title="Omni-Jarvis Vision Server")
 
@@ -71,7 +71,7 @@ async def handle_command(command: dict):
         raise HTTPException(status_code=400, detail="Поле 'command' обязательно")
     
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Команда: {text}")
-    result = run_agent(text)
+    result = ask_agent(text)
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Результат: {result}")
     
     return {"status": "ok", "result": result}

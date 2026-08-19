@@ -1,85 +1,48 @@
 # core/intent.py
-# Модуль для распознавания намерений (интентов) из текстовой команды
+import re
+import requests
+import json
 
 def detect_intent(text: str) -> dict:
-    """
-    Преобразует текст в структурированный интент.
-    Пока без LLM, только простые правила (регулярки и ключевые слова).
-    """
     text_lower = text.lower().strip()
     
-    # 1. Проверяем команды сисадмина
+    # Проверка порта
     if "порт" in text_lower and ("провер" in text_lower or "открыт" in text_lower):
-        # Ищем IP-адрес в тексте (грубо)
-        import re
         ip_match = re.search(r'\d+\.\d+\.\d+\.\d+', text)
         ip = ip_match.group(0) if ip_match else "не указан"
-        return {
-            "intent": "check_port",
-            "params": {"ip": ip}
-        }
+        return {"intent": "check_port", "params": {"ip": ip}}
     
-    # 2. Команда на закрытие порта
+    # Закрытие порта
     if "закрой" in text_lower and "порт" in text_lower:
-        return {
-            "intent": "close_port",
-            "params": {"port": 3389}  # по умолчанию, но можно распарсить
-        }
+        port_match = re.search(r'\b(\d{1,5})\b', text)
+        port = int(port_match.group(1)) if port_match else 3389
+        return {"intent": "close_port", "params": {"port": port}}
     
-    # 3. Остальные команды — пока заглушка
-    return {
-        "intent": "unknown",
-        "params": {"text": text}
-    }
-
-# Тестовый запуск (для проверки в консоли)
-if __name__ == "__main__":
-    test_queries = [
-        "проверь порт 3389 на сервере 192.168.1.10",
-        "закрой порт",
-        "сделай чай"
-    ]
-    for q in test_queries:
-        print(f"{q} -> {detect_intent(q)}")# core/intent.py
-# Модуль для распознавания намерений (интентов) из текстовой команды
-
-def detect_intent(text: str) -> dict:
-    """
-    Преобразует текст в структурированный интент.
-    Пока без LLM, только простые правила (регулярки и ключевые слова).
-    """
-    text_lower = text.lower().strip()
-    
-    # 1. Проверяем команды сисадмина
-    if "порт" in text_lower and ("провер" in text_lower or "открыт" in text_lower):
-        # Ищем IP-адрес в тексте (грубо)
-        import re
+    # Пинг
+    if "пинг" in text_lower or "пропинг" in text_lower:
         ip_match = re.search(r'\d+\.\d+\.\d+\.\d+', text)
         ip = ip_match.group(0) if ip_match else "не указан"
-        return {
-            "intent": "check_port",
-            "params": {"ip": ip}
-        }
+        return {"intent": "ping", "params": {"ip": ip}}
     
-    # 2. Команда на закрытие порта
-    if "закрой" in text_lower and "порт" in text_lower:
-        return {
-            "intent": "close_port",
-            "params": {"port": 3389}  # по умолчанию, но можно распарсить
-        }
+    # Создание пользователя
+    if "создай" in text_lower and ("пользователя" in text_lower or "учётку" in text_lower or "учетку" in text_lower):
+        user_match = re.search(r'для\s*([А-Яа-яЁёA-Za-z]+)', text)
+        username = user_match.group(1) if user_match else "новый_пользователь"
+        return {"intent": "create_user", "params": {"username": username}}
     
-    # 3. Остальные команды — пока заглушка
-    return {
-        "intent": "unknown",
-        "params": {"text": text}
-    }
-
-# Тестовый запуск (для проверки в консоли)
-if __name__ == "__main__":
-    test_queries = [
-        "проверь порт 3389 на сервере 192.168.1.10",
-        "закрой порт",
-        "сделай чай"
-    ]
-    for q in test_queries:
-        print(f"{q} -> {detect_intent(q)}")
+    # ПОИСК ФАЙЛОВ (исправленное правило)
+    if "найди" in text_lower and ("файл" in text_lower or "файлы" in text_lower):
+        # Ищем фразу после "файл" или "файлы"
+        match = re.search(r'(?:файл|файлы)\s*(.+)', text)
+        if match:
+            raw = match.group(1).strip()
+            # Убираем предлоги
+            filename = re.sub(r'^(с|на|по|для)\s+', '', raw)
+            if not filename:
+                filename = "отчёт"
+        else:
+            filename = "отчёт"
+        return {"intent": "search_file", "params": {"filename": filename}}
+    
+    # Неизвестно
+    return {"intent": "unknown", "params": {"text": text}}
