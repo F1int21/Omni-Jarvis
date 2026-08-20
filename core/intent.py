@@ -28,6 +28,13 @@ def detect_intent(text: str) -> dict:
         username = user_match.group(1) if user_match else "новый_пользователь"
         return {"intent": "create_user", "params": {"username": username}}
 
+    # Клик по кнопке
+    if "нажми" in text_lower or "клик" in text_lower:
+        # Ищем название кнопки после "нажми" или "клик"
+        match = re.search(r'(?:нажми|клик)\s+(.+)', text, re.IGNORECASE)
+        target = match.group(1).strip() if match else "ОК"
+        return {"intent": "click", "params": {"target": target}}
+
     # ПОИСК ФАЙЛОВ (с коррекцией окончаний)
     if "найди" in text_lower and ("файл" in text_lower or "файлы" in text_lower):
         # 1. Сначала проверяем, есть ли в запросе слово "отчёт" (в любом падеже)

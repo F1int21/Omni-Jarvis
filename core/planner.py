@@ -17,5 +17,8 @@ def create_plan(intent: str, params: dict) -> list:
         return [{"action": "run_command", "params": {"cmd": f"netsh advfirewall firewall add rule name='Block Port {params['port']}' dir=in action=block protocol=TCP localport={params['port']}"}}]
     elif intent == "create_user":
         return [{"action": "run_command", "params": {"cmd": f"net user {params['username']} P@ssw0rd /add"}}]
+    elif intent == "click":
+        return [{"action": "click", "params": {"target": params.get("target", "ОК")}}]
     else:
         return [{"action": "ask_user", "params": {"question": f"Задача не распознана: {params.get('text', '')}"}}]
+    

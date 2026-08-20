@@ -92,5 +92,28 @@ def execute_step(step: dict) -> str:
         answer = input(">> ").strip()
         return f"Ответ пользователя: {answer}"
 
+    elif action == "click":
+        target = params.get("target")
+        if not target:
+            return "❌ Не указан target для клика."
+        print(f"  🖱️ Ищу текст '{target}' на экране...")
+        try:
+            from ai_vision import find_text_center
+            import pyautogui
+            # Делаем скриншот и ищем
+            screenshot_path = "click_scan.png"
+            import pyautogui as pg
+            pg.screenshot(screenshot_path)
+            result = find_text_center(screenshot_path, [target])
+            if result:
+                x, y = result['x'], result['y']
+                print(f"  ✅ Найдено в ({x}, {y}), кликаю...")
+                pyautogui.click(x, y)
+                return f"✅ Клик по '{target}' выполнен в ({x}, {y})"
+            else:
+                return f"❌ Текст '{target}' не найден на экране."
+        except Exception as e:
+            return f"❌ Ошибка клика: {e}"
+
     else:
         return f"❌ Неизвестное действие: {action}"
