@@ -27,27 +27,26 @@ def detect_intent(text: str) -> dict:
         user_match = re.search(r'для\s*([А-Яа-яЁёA-Za-z]+)', text)
         username = user_match.group(1) if user_match else "новый_пользователь"
         return {"intent": "create_user", "params": {"username": username}}
-
-    # Клик по кнопке
-    if "нажми" in text_lower or "клик" in text_lower:
-        # Ищем название кнопки после "нажми" или "клик"
-        match = re.search(r'(?:нажми|клик)\s+(.+)', text, re.IGNORECASE)
-        target = match.group(1).strip() if match else "ОК"
-        return {"intent": "click", "params": {"target": target}}
-
-    # ПОИСК ФАЙЛОВ (с коррекцией окончаний)
+    
+    # ПОИСК ФАЙЛОВ
     if "найди" in text_lower and ("файл" in text_lower or "файлы" in text_lower):
-        # 1. Сначала проверяем, есть ли в запросе слово "отчёт" (в любом падеже)
-        if "отчёт" in text_lower:
-            filename = "отчёт"
-        else:
-            # 2. Иначе пытаемся вытащить первое слово после "файл" или "файлы"
-            match = re.search(r'(?:файл|файлы)\s+(?:с|на|по|для)?\s*([А-Яа-яЁёA-Za-z0-9_\-]+)', text, re.IGNORECASE)
-            if match:
-                filename = match.group(1)
-            else:
+        match = re.search(r'(?:файл|файлы)\s*(.+)', text)
+        if match:
+            raw = match.group(1).strip()
+            filename = re.sub(r'^(с|на|по|для)\s+', '', raw)
+            if not filename:
                 filename = "отчёт"
+        else:
+            filename = "отчёт"
         return {"intent": "search_file", "params": {"filename": filename}}
-          
+    
+    # УСТАНОВКА ПРОГРАММЫ (исправленное извлечение)
+    if "установи" in text_lower or "установить" in text_lower:
+        # Убираем "на windows" и другие уточнения
+        cleaned = re.sub(r'\s+(на|для|под)\s+windows', '', text_lower)
+        match = re.search(r'(?:установи|установить)\s+([a-zа-яё0-9\-_]+)', cleaned, re.IGNORECASE)
+        program = match.group(1) if match else "программу"
+        return {"intent": "install_program", "params": {"program": program}}
+    
     # Неизвестно
     return {"intent": "unknown", "params": {"text": text}}
