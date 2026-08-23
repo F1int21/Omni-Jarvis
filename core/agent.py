@@ -41,7 +41,7 @@ def ask_agent(query: str) -> str:
     search_results = search_web(query, max_results=2)
     print("✅ Поиск завершён.")
 
-    # 1. Промпт для Gemini
+    # ===== Обновлённый промпт с новыми инструментами =====
     prompt = f"""
 Ты — интеллектуальный помощник. Пользователь дал задачу: "{query}"
 
@@ -50,12 +50,32 @@ def ask_agent(query: str) -> str:
 
 Составь план действий в формате JSON-массива.
 Каждый шаг — объект с полями:
-- "action": одно из: download, run_command, install_exe, search_files, click, ask_user, send_email, move_file
-- "params": словарь параметров
-- "requires_confirmation": true (если шаг критичный)
+- "action": одно из действий:
+   * download(url, dest) — скачать файл.
+   * run_command(cmd) — выполнить команду.
+   * install_exe(path, silent) — запустить установщик.
+   * search_files(pattern, roots, max) — найти файлы.
+   * click(target) — кликнуть по тексту на экране.
+   * ask_user(question) — запросить уточнение у пользователя.
+   * send_email(to, subject, body, attachment) — отправить письмо.
+   * move_file(src, dst) — скопировать/переместить файл.
+   * parse_ticket(image_path) — распознать наряд/табличку с изображения (возвращает JSON с данными: номер наряда, адрес, тип работ, IP, логин, пароль, SN, MAC, ФИО).
+   * open_lanbilling() — открыть интерфейс LanBilling (в браузере или приложении).
+   * fill_lanbilling_fields(fields) — заполнить поля учётной записи (передать словарь с данными: fio, login, tariff, ip, mac, sn, date_start, date_end и др.).
+   * submit_lanbilling() — сохранить учётную запись.
+   * verify_lanbilling() — проверить, что запись создалась (поиск по логину или адресу).
+- "params": словарь с параметрами для действия.
+- "requires_confirmation": true, если шаг критичный (например, установка, отправка письма, создание учётки).
 
-Если задача не требует действий — верни [].
-Пример: [{{"action":"search_files","params":{{"pattern":"отчёт","roots":["C:\\\\Users\\\\Work\\\\Desktop"]}}}}]
+Если задача не требует действий, верни пустой массив [].
+Пример для задачи с нарядом:
+[
+  {{"action":"parse_ticket", "params":{{"image_path":"C:/Users/Work/Desktop/naryad.jpg"}}}},
+  {{"action":"open_lanbilling", "params":{{}}}},
+  {{"action":"fill_lanbilling_fields", "params":{{"fields":{{"fio":"Иванов И.И.", "login":"ivanov", "tariff":"Продвинутый", "ip":"192.168.1.1", "mac":"8C:AE:DB:91:76:14", "sn":"RT420F312511003869"}}}}, "requires_confirmation": true}},
+  {{"action":"submit_lanbilling", "params":{{}}}},
+  {{"action":"verify_lanbilling", "params":{{}}}}
+]
 Ответь ТОЛЬКО JSON-массивом, без пояснений.
 """
 

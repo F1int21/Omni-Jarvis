@@ -115,5 +115,31 @@ def execute_step(step: dict) -> str:
         except Exception as e:
             return f"❌ Ошибка клика: {e}"
 
+    elif action == "parse_ticket":
+        image_path = params.get("image_path")
+        if not image_path:
+            return "❌ Не указан путь к изображению."
+        from core.ticket_parser import parse_ticket_image
+        data = parse_ticket_image(image_path)
+        return f"Данные наряда: {json.dumps(data, ensure_ascii=False, indent=2)}"
+
+    elif action == "open_lanbilling":
+        # Пока заглушка — потом заменим на реальный клик/открытие браузера
+        return "🔜 Открытие LanBilling (в разработке)"
+
+    elif action == "fill_lanbilling_fields":
+        # Принимает словарь с полями (ФИО, логин, тариф, IP, MAC, SN и т.д.)
+        fields = params.get("fields", {})
+        # Здесь будет логика заполнения через кликер/ввод текста
+        return f"🔜 Заполнение полей: {fields}"
+
+    elif action == "submit_lanbilling":
+        # Нажать кнопку «Сохранить» или «Создать»
+        return "🔜 Сохранение учётной записи"
+
+    elif action == "verify_lanbilling":
+        # Проверить, что запись создалась (поиск по логину или адресу)
+        return "🔜 Проверка создания учётной записи"
+
     else:
         return f"❌ Неизвестное действие: {action}"
